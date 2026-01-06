@@ -1,0 +1,54 @@
+{
+  "id": "fraction-addition",
+  "topic": "fraction-addition",
+  "grade": "elementary-3-4",
+  "questionType": "multiple_choice",
+  "mathSchema": {
+    "variableRanges": {
+      "num1": { "min": 1, "max": 5 },
+      "den1": { "min": 2, "max": 6 },
+      "num2": { "min": 1, "max": 5 },
+      "den2": { "min": 2, "max": 6 }
+    },
+    "constraints": [
+      "num1 < den1",
+      "num2 < den2"
+    ]
+  },
+  "solutionTemplate": "(num1 * den2 + num2 * den1) / (den1 * den2)",
+  "errorPatterns": [
+    {
+      "name": "add-denominators",
+      "description": "분모끼리 더함 (통분 오류)",
+      "generator": "(num1 + num2) / (den1 + den2)"
+    },
+    {
+      "name": "no-common-denominator",
+      "description": "통분 없이 분자만 더함",
+      "generator": "(num1 + num2) / den1"
+    },
+    {
+      "name": "multiply-instead",
+      "description": "덧셈 대신 곱셈",
+      "generator": "(num1 * num2) / (den1 * den2)"
+    }
+  ],
+  "stemTemplates": {
+    "A1": [
+      "Add: {num1}/{den1} + {num2}/{den2} = ?",
+      "What is {num1}/{den1} + {num2}/{den2}?"
+    ],
+    "A2": [
+      "Calculate {num1}/{den1} plus {num2}/{den2}.",
+      "Find the sum of {num1}/{den1} and {num2}/{den2}."
+    ],
+    "B1": [
+      "Add the fractions {num1}/{den1} and {num2}/{den2}. Express your answer in simplest form.",
+      "Calculate the sum of {num1}/{den1} and {num2}/{den2}."
+    ],
+    "B2": [
+      "Compute the sum of the fractions {num1}/{den1} and {num2}/{den2}, and express the result as a fraction in its lowest terms.",
+      "Determine the value of {num1}/{den1} + {num2}/{den2}, simplifying your answer where possible."
+    ]
+  }
+}

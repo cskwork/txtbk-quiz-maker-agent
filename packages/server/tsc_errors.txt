@@ -1,0 +1,8 @@
+src/routes/export.ts(3,20): error TS2305: Module '"docx"' has no exported member 'Packer'.
+src/routes/export.ts(3,28): error TS2305: Module '"docx"' has no exported member 'Paragraph'.
+src/routes/export.ts(3,39): error TS2305: Module '"docx"' has no exported member 'TextRun'.
+src/routes/export.ts(3,48): error TS2305: Module '"docx"' has no exported member 'HeadingLevel'.
+src/routes/export.ts(164,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+src/routes/generate.ts(39,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+src/routes/recommend.ts(40,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+src/routes/recommend.ts(99,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.

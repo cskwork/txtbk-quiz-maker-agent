@@ -1,0 +1,53 @@
+{
+  "id": "linear-equation-basic",
+  "topic": "linear-equation",
+  "grade": "middle-1",
+  "questionType": "multiple_choice",
+  "mathSchema": {
+    "variableRanges": {
+      "a": { "min": 2, "max": 10 },
+      "b": { "min": 1, "max": 20 },
+      "c": { "min": 1, "max": 30 }
+    },
+    "constraints": [
+      "(c - b) % a === 0",
+      "a !== 1"
+    ]
+  },
+  "solutionTemplate": "(c - b) / a",
+  "errorPatterns": [
+    {
+      "name": "sign-error",
+      "description": "부호 실수 - 덧셈으로 계산",
+      "generator": "(c + b) / a"
+    },
+    {
+      "name": "division-error",
+      "description": "나눗셈 순서 오류",
+      "generator": "a / (c - b)"
+    },
+    {
+      "name": "no-division",
+      "description": "나눗셈 생략",
+      "generator": "c - b"
+    }
+  ],
+  "stemTemplates": {
+    "A1": [
+      "Find x: {a}x + {b} = {c}",
+      "What is x? {a}x + {b} = {c}"
+    ],
+    "A2": [
+      "Solve for x: {a}x + {b} = {c}",
+      "Find the value of x in the equation {a}x + {b} = {c}"
+    ],
+    "B1": [
+      "Solve the linear equation {a}x + {b} = {c} and find the value of x.",
+      "Determine the solution to the equation {a}x + {b} = {c}."
+    ],
+    "B2": [
+      "Given the linear equation {a}x + {b} = {c}, determine the value of the unknown variable x.",
+      "Find the solution set for the equation {a}x + {b} = {c}, where x is a real number."
+    ]
+  }
+}

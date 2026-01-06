@@ -1,0 +1,8 @@
+src/App.tsx(125,11): error TS2322: Type '(input: Record<string, unknown>) => Promise<void>' is not assignable to type '(input: QuestionGenerationInput) => void'.
+  Types of parameters 'input' and 'input' are incompatible.
+    Type 'QuestionGenerationInput' is not assignable to type 'Record<string, unknown>'.
+      Index signature for type 'string' is missing in type 'QuestionGenerationInput'.
+src/App.tsx(126,11): error TS2322: Type '(input: Record<string, unknown>) => Promise<void>' is not assignable to type '(input: QuestionGenerationInput) => void'.
+  Types of parameters 'input' and 'input' are incompatible.
+    Type 'QuestionGenerationInput' is not assignable to type 'Record<string, unknown>'.
+      Index signature for type 'string' is missing in type 'QuestionGenerationInput'.

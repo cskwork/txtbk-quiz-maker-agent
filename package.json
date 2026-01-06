@@ -1,0 +1,24 @@
+{
+  "name": "textbook-question-maker-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "생성형 문항 생성기 - 교육과정 정합적 수학 문항 생성 도구",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@10.0.0"
+}
