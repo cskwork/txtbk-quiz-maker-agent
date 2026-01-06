@@ -414,7 +414,7 @@ function getOperationText(operation: string): { verb: string; symbol: string; pr
   }
 }
 
-// Fallback 지문 생성
+// Fallback 지문 생성 (LaTeX 형식)
 function generateFallbackStem(
   mathStructure: { operation: string; values: Record<string, number>; answer: number | string },
   englishLevel: EnglishLevel
@@ -428,15 +428,18 @@ function generateFallbackStem(
 
   if (vars.length >= 2) {
     const [[, a], [, b]] = vars;
+    // LaTeX 수식 생성
+    const latexExpr = `$${a} ${opText.symbol} ${b}$`;
+    
     switch (englishLevel) {
       case 'A1':
-        return `What is ${a} ${opText.verb} ${b}?`;
+        return `What is ${latexExpr}?`;
       case 'A2':
-        return `Calculate ${a} ${opText.symbol} ${b}.`;
+        return `Calculate ${latexExpr}.`;
       case 'B1':
-        return `Find the result of ${a} ${opText.symbol} ${b}.`;
+        return `Find the result of ${latexExpr}.`;
       case 'B2':
-        return `Determine the value when ${a} is ${opText.preposition} ${b}.`;
+        return `Determine the value of the expression ${latexExpr}.`;
     }
   }
 
