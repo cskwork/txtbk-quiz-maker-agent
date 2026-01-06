@@ -9,6 +9,7 @@ export {
   runAgent,
   generateQuestionsWithAgent,
   surfaceToEnglish,
+  surfaceToKorean,
   AgentError,
 } from './agent/index.js';
 export type {
@@ -22,6 +23,10 @@ export {
   generateQuestions,
   createDefaultTemplate,
 } from './generator/index.js';
+
+export {
+  loadTemplate,
+} from './generator/template-loader.js';
 
 // 검증기
 export {

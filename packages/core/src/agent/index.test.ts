@@ -239,7 +239,7 @@ describe('surfaceToEnglish', () => {
 
     expect(result).toContain('5');
     expect(result).toContain('3');
-    expect(result).toContain('plus');
+    expect(result).toContain('+'); // LaTeX 형식으로 + 기호 사용
   });
 
   it('should fallback on JSON response', async () => {

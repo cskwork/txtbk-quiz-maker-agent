@@ -1,5 +1,5 @@
 // 문항 생성 엔진
-// 하이브리드 방식: 템플릿 기반 파라미터 샘플링 → 정답 계산 → 영어 표면화
+// 하이브리드 방식: 템플릿 기반 파라미터 샘플링 → 정답 계산 → 한국어/영어 표면화
 
 import { v4 as uuidv4 } from 'uuid';
 import * as math from 'mathjs';
@@ -10,8 +10,9 @@ import type {
   QuestionMetadata,
   Difficulty,
   CognitiveLevel,
+  EnglishLevel,
 } from '../types/index.js';
-import { surfaceToEnglish } from '../agent/index.js';
+import { surfaceToEnglish, surfaceToKorean } from '../agent/index.js';
 
 // 난이도별 파라미터 범위 조정 계수
 const DIFFICULTY_MULTIPLIERS: Record<Difficulty, { min: number; max: number }> = {
@@ -150,6 +151,64 @@ function selectCognitiveLevel(
   return distribution[Math.floor(random() * distribution.length)];
 }
 
+// 템플릿 stem에 파라미터 대입
+function interpolateStem(
+  template: QuestionTemplate,
+  params: Record<string, number>,
+  englishLevel: EnglishLevel,
+): string {
+  const stemOptions = template.stemTemplates[englishLevel];
+  if (!stemOptions || stemOptions.length === 0) {
+    return '문제를 풀어주세요.';
+  }
+
+  // 랜덤 선택
+  const stemTemplate = stemOptions[Math.floor(Math.random() * stemOptions.length)];
+
+  // 파라미터 치환: ${a}, ${b}, ${c} 또는 {a}, {b}, {c} 형식
+  return stemTemplate.replace(/\$?\{(\w+)\}/g, (_, key) => {
+    return params[key] !== undefined ? String(params[key]) : `{${key}}`;
+  });
+}
+
+// 한국어 풀이 단계 생성
+function generateKoreanExplanation(
+  template: QuestionTemplate,
+  params: Record<string, number>,
+  answer: number | string,
+): string[] {
+  // 일차방정식 형태
+  if (template.solutionTemplate.includes('(c - b) / a')) {
+    const { a, b, c } = params;
+    return [
+      `주어진 조건: $${a}x + ${b} = ${c}$`,
+      `풀이: 양쪽에서 ${b}를 빼면 $${a}x = ${c - b}$`,
+      `양변을 ${a}로 나누면 $x = ${answer}$`,
+    ];
+  }
+
+  // 기본 연산
+  const entries = Object.entries(params);
+  return [
+    `주어진 조건: ${entries.map(([k, v]) => `$${k} = ${v}$`).join(', ')}`,
+    `계산: $${template.solutionTemplate}$`,
+    `정답: $${answer}$`,
+  ];
+}
+
+// 영어 풀이 단계 생성
+function generateEnglishExplanation(
+  template: QuestionTemplate,
+  params: Record<string, number>,
+  answer: number | string,
+): string[] {
+  return [
+    `Given: ${Object.entries(params).map(([k, v]) => `$${k} = ${v}$`).join(', ')}`,
+    `Apply: $${template.solutionTemplate}$`,
+    `Calculate: $${answer}$`,
+  ];
+}
+
 // 문항 1개 생성
 async function generateSingleQuestion(
   input: QuestionGenerationInput,
@@ -169,13 +228,22 @@ async function generateSingleQuestion(
   // 3. 인지 수준 선택
   const cognitiveLevel = selectCognitiveLevel(input.difficulty, random);
 
-  // 4. 영어 표면화 (LLM 사용)
+  // 4. 지문 생성 - 과목에 따라 언어 결정 (LLM 사용)
+  const isMathSubject = input.subject === '수학' || input.subject === 'Math' || input.subject.toLowerCase() === 'math';
   const mathStructure = {
     operation: template.topic,
     values: params,
     answer,
   };
-  const stem = await surfaceToEnglish(mathStructure, input.englishLevel);
+  let stem: string;
+
+  if (isMathSubject) {
+    // 수학: Claude Agent SDK로 한국어 지문 생성
+    stem = await surfaceToKorean(mathStructure);
+  } else {
+    // 영어: Claude Agent SDK로 영어 지문 생성
+    stem = await surfaceToEnglish(mathStructure, input.englishLevel);
+  }
 
   // 5. 선지 생성 (객관식인 경우)
   let choices: string[] | undefined;
@@ -188,12 +256,10 @@ async function generateSingleQuestion(
     displayAnswer = ['A', 'B', 'C', 'D'][shuffled.correctIndex];
   }
 
-  // 6. 풀이 단계 생성
-  const explanationSteps = [
-    `Given: ${Object.entries(params).map(([k, v]) => `${k} = ${v}`).join(', ')}`,
-    `Apply: ${template.solutionTemplate}`,
-    `Calculate: ${answer}`,
-  ];
+  // 6. 풀이 단계 생성 - 과목에 따라 언어 결정
+  const explanationSteps = isMathSubject
+    ? generateKoreanExplanation(template, params, answer)
+    : generateEnglishExplanation(template, params, answer);
 
   // 7. 메타데이터 구성
   const metadata: QuestionMetadata = {

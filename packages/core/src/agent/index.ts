@@ -489,3 +489,87 @@ Do not include the answer in the question.`;
     return generateFallbackStem(mathStructure, englishLevel);
   }
 }
+
+// 한국어 폴백 지문 생성
+function generateKoreanFallbackStem(
+  mathStructure: { operation: string; values: Record<string, number>; answer: number | string },
+): string {
+  const { values, operation } = mathStructure;
+  const vars = Object.entries(values);
+
+  // 일차방정식 형태
+  if (operation.includes('방정식') || operation.includes('equation')) {
+    if (vars.length >= 3) {
+      const [[, a], [, b], [, c]] = vars;
+      return `일차방정식 $${a}x + ${b} = ${c}$를 풀어 $x$의 값을 구하세요.`;
+    }
+  }
+
+  // 기본 연산
+  if (vars.length >= 2) {
+    const [[, a], [, b]] = vars;
+    const opMap = TOPIC_TO_OPERATION[operation] || 'addition';
+    const symbolMap: Record<string, string> = {
+      addition: '+',
+      subtraction: '-',
+      multiplication: '×',
+      division: '÷',
+    };
+    const symbol = symbolMap[opMap] || '+';
+    return `$${a} ${symbol} ${b}$의 값을 구하세요.`;
+  }
+
+  return '문제를 풀어주세요.';
+}
+
+// 한국어 표면화 에이전트 (수학 과목용)
+export async function surfaceToKorean(
+  mathStructure: {
+    operation: string;
+    values: Record<string, number>;
+    answer: number | string;
+  },
+): Promise<string> {
+  const prompt = `당신은 한국 수학 교육 전문가입니다. 
+다음 수학 구조를 한국어 수학 문제로 변환해주세요:
+
+구조: ${JSON.stringify(mathStructure)}
+
+요구사항:
+1. 반드시 한국어로만 작성
+2. 수식은 LaTeX 형식 사용 (예: $x$, $2x + 3 = 7$)
+3. 중학교 수준의 자연스러운 문장
+4. 정답은 포함하지 마세요
+5. JSON이나 추가 형식 없이 문제 텍스트만 반환
+
+예시:
+- 일차방정식: "일차방정식 $3x + 5 = 14$를 풀어 $x$의 값을 구하세요."
+- 덧셈: "$15 + 23$의 값을 구하세요."`;
+
+  const collectedContent: string[] = [];
+
+  try {
+    for await (const message of runAgent(prompt, {
+      permissionMode: 'plan',
+      allowedTools: [],
+      maxBudgetUsd: 0.1,
+    })) {
+      if (message.type === 'text') {
+        collectedContent.push(message.content);
+      }
+    }
+
+    const result = collectedContent.join('').trim();
+
+    // 유효성 검증: 빈 응답, JSON 형식, 또는 영어로 시작하는 경우
+    if (!result || result.startsWith('{') || result.startsWith('[') || /^[A-Za-z]/.test(result)) {
+      return generateKoreanFallbackStem(mathStructure);
+    }
+
+    return result;
+  } catch (error) {
+    console.warn('surfaceToKorean failed, using fallback:', error);
+    return generateKoreanFallbackStem(mathStructure);
+  }
+}
+

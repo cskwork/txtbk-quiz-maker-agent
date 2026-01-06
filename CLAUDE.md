@@ -30,5 +30,7 @@ ANTHROPIC_API_KEY=your-api-key
 ```
 
 <insights>
+- 주제별 템플릿 로딩: `loadTemplate(topic, grade)` 패턴으로 JSON 파일 매핑
+- 수학 과목 언어 라우팅: `subject === '수학'` 체크로 한국어/영어 분기
 <!-- 문제 해결 중 얻은 인사이트를 여기에 기록 -->
 </insights>

@@ -2,7 +2,7 @@
 import type { FastifyInstance } from 'fastify';
 import {
   generateQuestions,
-  createDefaultTemplate,
+  loadTemplate,
   validateQuestions,
   QuestionGenerationInputSchema,
   type QuestionGenerationInput,
@@ -73,7 +73,7 @@ export function registerGenerateRoutes(server: FastifyInstance): void {
         const input = parseResult.data;
 
         // 템플릿 로드 (현재는 기본 템플릿 사용)
-        const template = createDefaultTemplate(input.topic, input.grade);
+        const template = loadTemplate(input.topic, input.grade);
 
         // 문항 생성
         const questions = await generateQuestions(input, template);
@@ -123,7 +123,7 @@ export function registerGenerateRoutes(server: FastifyInstance): void {
           });
         }
 
-        const template = createDefaultTemplate(parseResult.data.topic, parseResult.data.grade);
+        const template = loadTemplate(parseResult.data.topic, parseResult.data.grade);
         const questions = await generateQuestions(parseResult.data, template);
 
         // TODO: partialRegenerate 옵션에 따라 부분 재생성 구현

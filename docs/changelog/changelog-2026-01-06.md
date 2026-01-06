@@ -101,3 +101,68 @@
 - API 헬스체크: 통과
 - 문항 생성 API: 작동 확인
 - UI: 즉시 생성/추천 세트 생성 정상 작동
+
+---
+
+## 문항 생성기 한국어-영어 혼합 오류 수정
+
+### 문제
+- `generateFallbackStem` 함수가 한국어 주제(예: "일차방정식")를 영어 문장에 직접 삽입
+- 출력 예: "Find the result of 11 일차방정식 11."
+
+### 수정 (`packages/core/src/agent/index.ts`)
+- `TOPIC_TO_OPERATION` 매핑 추가: 한국어 주제 → 영어 연산 매핑 (40+ 주제)
+- `inferOperationFromTemplate`: 솔루션 템플릿(a + b)에서 연산 유형 추론
+- `getOperationText`: 연산별 영어 표현(verb, symbol, preposition) 생성
+- B1 수정 후: "Find the result of $11 + 11$."
+
+---
+
+## LaTeX 수학 수식 렌더링 지원 추가
+
+### 추가된 파일
+- `packages/web/src/components/MathRenderer.tsx`: KaTeX 기반 수식 렌더러
+  - 인라인 수식 ($...$) 지원
+  - 블록 수식 ($$...$$) 지원
+  - 에러 처리 및 폴백
+
+### 변경된 파일
+- `packages/web/src/components/QuestionPreview.tsx`: MathRenderer 적용
+  - 지문(stem), 선지(choices), 해설(explanation) 모두 LaTeX 렌더링
+- `packages/core/src/agent/index.ts`: `generateFallbackStem` LaTeX 출력
+- `packages/core/src/generator/index.ts`: 풀이 단계 LaTeX 출력
+
+### 의존성 추가
+- `katex`: LaTeX 수식 렌더링 라이브러리
+- `@types/katex`: TypeScript 타입 정의
+
+---
+
+## 템플릿 로딩 및 수학 과목 한국어 출력 수정
+
+### 문제
+1. 주제 "일차방정식" 선택해도 단순 덧셈 문제 생성 (기본 템플릿 사용)
+2. 수학 과목에서 영어 출력됨 (한국어여야 함)
+
+### 원인
+- `createDefaultTemplate()` 함수가 주제 무관하게 `a + b` 템플릿 반환
+- 풀이 단계 `Given:`, `Apply:`, `Calculate:` 영어로 하드코딩
+
+### 수정 사항
+
+#### `packages/core/src/generator/template-loader.ts` (신규)
+- `TOPIC_TO_TEMPLATE_ID`: 한국어 주제 → 템플릿 ID 매핑
+- `loadTemplate()`: JSON 템플릿 파일 로드, 폴백 시 기본 템플릿 생성
+- `createDefaultTemplate()`: 방정식 계열 기본 템플릿 추가
+
+#### `packages/core/src/generator/index.ts` (수정)
+- `interpolateStem()`: 템플릿 stem에 파라미터 대입 (한국어 지문)
+- `generateKoreanExplanation()`: 한국어 풀이 단계 생성
+- `generateSingleQuestion()`: 과목별 언어 라우팅 (수학→한국어, 영어→영어)
+
+#### `packages/server/src/routes/generate.ts` (수정)
+- `createDefaultTemplate()` → `loadTemplate()` 교체
+
+### 테스트
+- 기존 13개 테스트 모두 통과
+- 테스트 수정: fallback이 '+' 기호 사용 확인 (기존 'plus' 기대값 오류)
